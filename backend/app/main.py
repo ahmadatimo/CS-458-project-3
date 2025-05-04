@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.login import router as login_router
+from app.routes.survey import router as survey_router
 
 app = FastAPI()
 
@@ -17,3 +18,4 @@ def home():
 
 # Include login routes
 app.include_router(login_router)
+app.include_router(survey_router)
