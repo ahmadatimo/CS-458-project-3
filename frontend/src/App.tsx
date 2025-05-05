@@ -1,7 +1,7 @@
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from "react-router-dom";
 
 import LoginPage from "./pages/LoginPage";
-import SuccessfulLogin from "./pages/SuccessfulPage";
+import SurveyPage from "./pages/SurveyPage";
 
 
 export default function App() {
@@ -11,7 +11,7 @@ export default function App() {
         {/* HomePage is the default page */}
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} /> {/* Explicit route for /login */}
-        <Route path="/successful" element={<SuccessfulLogin />} />
+        <Route path="/survey" element={<SurveyPage />} />
       </>
     )
   );

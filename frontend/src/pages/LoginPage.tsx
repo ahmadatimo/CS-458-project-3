@@ -82,7 +82,7 @@ export default function LoginPage() {
         toast.success("✅ Login Successful!", { position: "top-center" });
         localStorage.setItem("auth_token", data.token); // Store token from email/password login
         setTimeout(() => {
-          navigate("/Successful");
+          navigate("/Survey");
         }, 1000);
       } else {
         toast.error(data.detail || "Invalid email or password.", { position: "top-center" });
