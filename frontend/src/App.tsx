@@ -2,7 +2,8 @@ import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } 
 
 import LoginPage from "./pages/LoginPage";
 import SurveyPage from "./pages/SurveyPage";
-
+import SurveyBuilderPage from "./pages/SurveyBuilderPage";
+import CreatedSurveyPage from "./pages/CreatedSurveyPage";
 
 export default function App() {
   const router = createBrowserRouter(
@@ -10,8 +11,10 @@ export default function App() {
       <>
         {/* HomePage is the default page */}
         <Route path="/" element={<LoginPage />} />
-        <Route path="/login" element={<LoginPage />} /> {/* Explicit route for /login */}
-        <Route path="/survey" element={<SurveyPage />} />
+        <Route path="/Login" element={<LoginPage />} /> {/* Explicit route for /login */}
+        <Route path="/Survey" element={<SurveyPage />} />
+        <Route path="/Builder" element={<SurveyBuilderPage />} />
+        <Route path="/Created-Survey" element={<CreatedSurveyPage />} /> {/* Explicit route for /successful */}
       </>
     )
   );

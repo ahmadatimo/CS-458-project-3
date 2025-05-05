@@ -50,7 +50,7 @@ export default function LoginPage() {
             toast.success("✅ Spotify Login Successful!", { position: "top-center" });
             localStorage.setItem("auth_token", data.user.spotify_id); // Store Spotify ID as token
             setTimeout(() => {
-              navigate("/Successful"); // Redirect to the success page
+              navigate("/Survey"); // Redirect to the success page
             }, 2000);
           } else {
             toast.error(data.detail || "Failed to log in with Spotify.", { position: "top-center" });
