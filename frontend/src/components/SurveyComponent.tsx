@@ -12,6 +12,7 @@ const educationLevels = [
 
 const availableAIModels = ["ChatGPT", "Bard", "Gemini", "Claude", "DeepSeek"];
 
+
 const SurveyComponent: React.FC = () => {
   const [form, setForm] = useState({
     name_surname: "",
@@ -31,25 +32,66 @@ const SurveyComponent: React.FC = () => {
   const [submitEnabled, setSubmitEnabled] = useState(false);
   const maxLength = 150;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [birthDateError, setBirthDateError] = useState("");
 
-  // Validate age
   useEffect(() => {
-    const { birth_day, birth_month, birth_year } = form;
-    const day = parseInt(birth_day);
-    const month = parseInt(birth_month);
-    const year = parseInt(birth_year);
-    try {
-      const date = new Date(year, month - 1, day);
-      const age = new Date().getFullYear() - year;
-      if (age >= 6 && age <= 120) {
-        setBirthDate(date.toISOString().split("T")[0]);
-      } else {
-        setBirthDate(null);
-      }
-    } catch {
+  const { birth_day, birth_month, birth_year } = form;
+  const day = parseInt(birth_day);
+  const month = parseInt(birth_month);
+  const year = parseInt(birth_year);
+
+  const isValidDate = (d: number, m: number, y: number): boolean => {
+    if (isNaN(d) || isNaN(m) || isNaN(y)) return false;
+    if (m < 1 || m > 12) {
       setBirthDate(null);
+      setBirthDateError("Enter a valid month (1–12)");
+      return false;
     }
-  }, [form.birth_day, form.birth_month, form.birth_year]);
+    if (d < 1 || d > 31) {
+      setBirthDate(null);
+      setBirthDateError("Enter a valid day (1–31)");
+      return false;
+    }
+
+    const date = new Date(y, m - 1, d);
+    const isRealDate =
+      date.getFullYear() === y &&
+      date.getMonth() === m - 1 &&
+      date.getDate() === d;
+
+    if (!isRealDate) {
+      setBirthDate(null);
+      setBirthDateError("This date does not exist");
+      return false;
+    }
+
+    return true;
+  };
+
+  try {
+    if (!isValidDate(day, month, year)) return;
+
+    const date = new Date(year, month - 1, day);
+    const today = new Date();
+
+    const age =
+      today.getFullYear() -
+      date.getFullYear() -
+      (today < new Date(today.getFullYear(), date.getMonth(), date.getDate()) ? 1 : 0);
+
+    if (age < 6 || age > 120) {
+      setBirthDate(null);
+      setBirthDateError("Enter valid date (Age 6–120)");
+    } else {
+      setBirthDate(date.toISOString().split("T")[0]);
+      setBirthDateError(""); // Clear any previous error
+    }
+  } catch {
+    setBirthDate(null);
+    setBirthDateError("Invalid birth date");
+  }
+}, [form.birth_day, form.birth_month, form.birth_year]);
+
 
   useEffect(() => {
     const valid =
@@ -175,6 +217,7 @@ const SurveyComponent: React.FC = () => {
         <div>
           <label className="block mb-1 font-medium">Full Name</label>
           <input
+            id = "name_surname"
             name="name_surname"
             onChange={handleChange}
             required
@@ -186,6 +229,7 @@ const SurveyComponent: React.FC = () => {
           <label className="block mb-1 font-medium">Birth Date</label>
           <div className="flex gap-2">
             <input
+              id="birth_day"
               name="birth_day"
               type="number"
               max={31}
@@ -194,6 +238,7 @@ const SurveyComponent: React.FC = () => {
               onChange={handleChange}
             />
             <input
+              id="birth_month"
               name="birth_month"
               type="number"
               max={12}
@@ -202,6 +247,7 @@ const SurveyComponent: React.FC = () => {
               onChange={handleChange}
             />
             <input
+              id="birth_year"
               name="birth_year"
               type="number"
               placeholder="YYYY"
@@ -209,16 +255,17 @@ const SurveyComponent: React.FC = () => {
               onChange={handleChange}
             />
           </div>
-          {birthDate === null && (
-            <p className="text-sm text-red-500 mt-1">
-              Enter valid date (Age 6–120)
-            </p>
-          )}
+          {birthDateError && (
+           <p className="text-sm text-red-500 mt-1" id="birthdate-error">
+             {birthDateError}
+          </p>
+      )}
         </div>
 
         <div>
           <label className="block mb-1 font-medium">Education Level</label>
           <select
+            id="education_level"
             name="education_level"
             onChange={handleChange}
             required
@@ -236,6 +283,7 @@ const SurveyComponent: React.FC = () => {
         <div>
           <label className="block mb-1 font-medium">City</label>
           <input
+            id="city"
             name="city"
             onChange={handleChange}
             className="w-full border px-4 py-2 rounded-lg"
@@ -251,6 +299,7 @@ const SurveyComponent: React.FC = () => {
             ].map(({ label, value }) => (
               <label key={value} className="flex items-center gap-2">
                 <input
+                  id={`gender-${value}`}
                   type="radio"
                   name="gender"
                   value={value}
@@ -279,6 +328,7 @@ const SurveyComponent: React.FC = () => {
 
               return (
                 <button
+                  id={`model-${model}`}
                   type="button"
                   key={model}
                   onClick={() => handleModelToggle(model)}
@@ -301,6 +351,7 @@ const SurveyComponent: React.FC = () => {
             {form.ai_models.map((model) => (
               <div key={model} className="mb-3">
                 <input
+                  id={`defect-${model}`}
                   placeholder={`${model} - What are its flaws?`}
                   value={form.defects[model]}
                   onChange={(e) => handleDefectChange(model, e.target.value)}
@@ -314,6 +365,7 @@ const SurveyComponent: React.FC = () => {
         <div>
           <label className="block font-medium mb-1">Beneficial Use of AI</label>
           <textarea
+            id="beneficial_use"
             name="beneficial_use"
             maxLength={maxLength}
             onChange={handleChange}
@@ -327,6 +379,7 @@ const SurveyComponent: React.FC = () => {
         <div>
           <label className="block font-medium mb-1">Email</label>
           <input
+            id="email"
             name="email"
             type="email"
             onChange={handleChange}
@@ -335,6 +388,7 @@ const SurveyComponent: React.FC = () => {
         </div>
 
         <button
+          id="submit-button"
           type="submit"
           disabled={!submitEnabled || isSubmitting}
           className={`w-full py-3 text-white font-semibold rounded-lg ${
