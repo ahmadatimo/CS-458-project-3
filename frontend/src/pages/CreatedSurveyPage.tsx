@@ -71,7 +71,7 @@ const CreatedSurveyPage: React.FC = () => {
       });
       if (!response.ok) throw new Error((await response.json()).detail || "Failed to submit survey");
       alert("Survey submitted, stored, and email sent successfully!");
-      navigate("/login");
+      handleLogout();
     } catch (err) {
       console.error(err);
       alert(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);

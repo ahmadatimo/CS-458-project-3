@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const educationLevels = [
@@ -14,6 +15,7 @@ const availableAIModels = ["ChatGPT", "Bard", "Gemini", "Claude", "DeepSeek"];
 
 
 const SurveyComponent: React.FC = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name_surname: "",
     birth_day: "",
@@ -139,6 +141,21 @@ const SurveyComponent: React.FC = () => {
     }));
   };
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/logout", { method: "POST", credentials: "include" });
+      if (res.ok) {
+        localStorage.removeItem("auth_token");
+        navigate("/login");
+      } else {
+        const data = await res.json();
+        alert(data.detail || "Logout failed.");
+      }
+    } catch {
+      alert("Error during logout.");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!submitEnabled || !birthDate) return;
@@ -163,6 +180,7 @@ const SurveyComponent: React.FC = () => {
       alert(
         typeof res.data === "string" ? res.data : JSON.stringify(res.data) // ✅ display real message, not [object Object]
       );
+      handleLogout();
     } catch (err: any) {
       const errorMsg =
         err.response?.data?.detail || "Something went wrong during submission.";
@@ -176,24 +194,7 @@ const SurveyComponent: React.FC = () => {
     <div className="px-4 sm:px-6">
       <div className="max-w-3xl mx-auto flex justify-between items-center mb-6">
         <button
-          onClick={async () => {
-            try {
-              const res = await fetch("http://localhost:8000/logout", {
-                method: "POST",
-                credentials: "include",
-              });
-
-              if (res.ok) {
-                localStorage.removeItem("auth_token");
-                window.location.href = "/login";
-              } else {
-                const data = await res.json();
-                alert(data.detail || "Logout failed.");
-              }
-            } catch (err) {
-              alert("Error while logging out.");
-            }
-          }}
+          onClick={handleLogout}
           className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg"
         >
           🚪 Logout
@@ -402,24 +403,7 @@ const SurveyComponent: React.FC = () => {
       </form>
       <div className="max-w-3xl mx-auto flex justify-between items-center mt-6 mb-6">
       <button
-        onClick={async () => {
-          try {
-            const res = await fetch("http://localhost:8000/logout", {
-              method: "POST",
-              credentials: "include",
-            });
-
-            if (res.ok) {
-              localStorage.removeItem("auth_token");
-              window.location.href = "/login";
-            } else {
-              const data = await res.json();
-              alert(data.detail || "Logout failed.");
-            }
-          } catch (err) {
-            alert("Error while logging out.");
-          }
-        }}
+        onClick={handleLogout}
         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg"
       >
         🚪 Logout
