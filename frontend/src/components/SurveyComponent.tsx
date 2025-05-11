@@ -53,11 +53,11 @@ const SurveyComponent: React.FC = () => {
       return false;
     }
 
-    const date = new Date(y, m - 1, d);
+    const date = new Date(y, m - 1, d + 1);
     const isRealDate =
       date.getFullYear() === y &&
       date.getMonth() === m - 1 &&
-      date.getDate() === d;
+      date.getDate() === d + 1;
 
     if (!isRealDate) {
       setBirthDate(null);
@@ -71,7 +71,7 @@ const SurveyComponent: React.FC = () => {
   try {
     if (!isValidDate(day, month, year)) return;
 
-    const date = new Date(year, month - 1, day);
+    const date = new Date(year, month - 1, day + 1);
     const today = new Date();
 
     const age =

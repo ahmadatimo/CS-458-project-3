@@ -10,20 +10,39 @@ export interface Question {
   label: string;
   type: string;
   options?: string[];
-  condition?: { dependentQuestionId: string; requiredAnswer: string } | null;
+  condition?: {
+    dependentQuestionId: string;
+    requiredAnswers: string[];
+    matchType?: "any" | "all";
+  } | null;
 }
 
 const SurveyBuilderPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [label, setLabel] = useState("");
   const [type, setType] = useState("text");
   const [optionsList, setOptionsList] = useState<string[]>([""]);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [condition, setCondition] = useState<
-    { dependentQuestionId: string; requiredAnswer: string } | null | undefined
-  >(undefined);
+
+  // condition holds parsed answers; rawAnswers holds the free-form input string
+  const [condition, setCondition] = useState<{
+    dependentQuestionId: string;
+    requiredAnswers: string[];
+    matchType?: "any" | "all";
+  } | null>(null);
+  const [rawAnswers, setRawAnswers] = useState<string>("");
+
+  // sync rawAnswers when condition changes
+  useEffect(() => {
+    if (condition) {
+      setRawAnswers(condition.requiredAnswers.join(","));
+    } else {
+      setRawAnswers("");
+    }
+  }, [condition]);
 
   useEffect(() => {
     if (location.state?.questions) {
@@ -39,45 +58,45 @@ const SurveyBuilderPage: React.FC = () => {
       label,
       type,
       options: ["multiple_choice", "checkbox", "dropdown"].includes(type)
-        ? optionsList.filter((opt) => opt.trim() !== "")
+        ? optionsList.filter(opt => opt.trim() !== "")
         : undefined,
-      condition: condition,
+      condition,
     };
 
-    setQuestions((prev) => {
-      if (editingId) {
-        return prev.map((q) => (q.id === editingId ? newQuestion : q));
-      } else {
-        return [...prev, newQuestion];
-      }
-    });
+    setQuestions(prev =>
+      editingId
+        ? prev.map(q => (q.id === editingId ? newQuestion : q))
+        : [...prev, newQuestion]
+    );
 
+    // reset form
     setLabel("");
     setType("text");
     setOptionsList([""]);
     setCondition(null);
     setEditingId(null);
+    setRawAnswers("");
   };
 
   const handleEdit = (question: Question) => {
     setLabel(question.label);
     setType(question.type);
     setOptionsList(question.options || [""]);
-    setCondition(question.condition);
+    setCondition(question.condition ? { ...question.condition } : null);
     setEditingId(question.id);
   };
 
   const handleDelete = (id: string) => {
-    setQuestions((prev) => prev.filter((q) => q.id !== id));
+    setQuestions(prev => prev.filter(q => q.id !== id));
   };
 
-  const handleNormalSurvey = () => {
-    navigate("/Survey");
-  };
+  const handleNormalSurvey = () => navigate("/Survey");
+  const handleCreateSurvey = () => navigate("/Created-Survey", { state: { questions } });
 
-  const handleCreateSurvey = () => {
-    navigate("/Created-Survey", { state: { questions } });
-  };
+  // only earlier questions allowed as dependencies
+  const availableDeps = editingId
+    ? questions.filter((_, idx) => idx < questions.findIndex(x => x.id === editingId))
+    : questions;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-100 to-pink-50 py-10 px-6">
@@ -86,61 +105,128 @@ const SurveyBuilderPage: React.FC = () => {
           <span>🔨</span> Design Your Own Survey
         </h1>
 
-        <QuestionInput
-          label={label}
-          setLabel={setLabel}
-          type={type}
-          setType={setType}
-        />
+        <QuestionInput label={label} setLabel={setLabel} type={type} setType={setType} />
 
-        {["multiple_choice", "checkbox", "dropdown"].includes(type) && (
-          <OptionInputGroup
-            optionsList={optionsList}
-            setOptionsList={setOptionsList}
-          />
-        )}
+        { ["multiple_choice", "checkbox", "dropdown"].includes(type) && (
+          <OptionInputGroup optionsList={optionsList} setOptionsList={setOptionsList} />
+        ) }
 
+        {/* Appear upon responding (Optional) */}
         <div className="space-y-4">
           <label className="block text-sm sm:text-base font-medium text-gray-700">
-            Conditional Logic (Optional)
+            Appear upon responding (Optional)
           </label>
+
           <select
             value={condition?.dependentQuestionId || ""}
-            onChange={(e) =>
+            onChange={e => {
+              const depId = e.target.value;
               setCondition(
-                e.target.value
-                  ? {
-                      dependentQuestionId: e.target.value,
-                      requiredAnswer: condition?.requiredAnswer || "",
-                    }
+                depId
+                  ? { dependentQuestionId: depId, requiredAnswers: [], matchType: "any" }
                   : null
-              )
-            }
+              );
+            }}
             className="w-full sm:w-1/2 border px-3 py-2 rounded-lg mb-2"
           >
             <option value="">Select dependent question</option>
-            {questions
-              .filter((q) => q.id !== editingId)
-              .map((q) => (
-                <option key={q.id} value={q.id}>
-                  {q.label}
-                </option>
-              ))}
+            {availableDeps.map(q => (
+              <option key={q.id} value={q.id}>
+                {q.label}
+              </option>
+            ))}
           </select>
-          {condition?.dependentQuestionId && (
-            <input
-              type="text"
-              placeholder="Required answer to show this question"
-              value={condition?.requiredAnswer || ""}
-              onChange={(e) =>
-                setCondition({
-                  ...condition,
-                  requiredAnswer: e.target.value,
-                })
+
+          {condition?.dependentQuestionId && (() => {
+            const depQ = questions.find(q => q.id === condition.dependentQuestionId);
+            if (depQ?.options) {
+              // checkbox: multi-select plus matchType toggle
+              if (depQ.type === "checkbox") {
+                return (
+                  <>
+                    <div className="flex flex-wrap gap-2">
+                      {depQ.options.map(opt => (
+                        <label key={opt} className="inline-flex items-center gap-1">
+                          <input
+                            type="checkbox"
+                            checked={condition.requiredAnswers.includes(opt)}
+                            onChange={e => {
+                              const checked = e.target.checked;
+                              const newVals = checked
+                                ? [...condition.requiredAnswers, opt]
+                                : condition.requiredAnswers.filter(v => v !== opt);
+                              setCondition({ ...condition, requiredAnswers: newVals });
+                            }}
+                          />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex gap-4">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          name="matchType"
+                          value="any"
+                          checked={(condition.matchType ?? "any") === "any"}
+                          onChange={() =>
+                            setCondition({ ...condition, matchType: "any" })
+                          }
+                        />
+                        <span className="ml-1">Match any</span>
+                      </label>
+                      <label className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          name="matchType"
+                          value="all"
+                          checked={condition.matchType === "all"}
+                          onChange={() =>
+                            setCondition({ ...condition, matchType: "all" })
+                          }
+                        />
+                        <span className="ml-1">Match all</span>
+                      </label>
+                    </div>
+                  </>
+                );
               }
-              className="w-full sm:w-1/2 border px-3 py-2 rounded-lg"
-            />
-          )}
+              // multiple-choice or dropdown: single-select radios
+              return (
+                <div className="flex flex-wrap gap-2">
+                  {depQ.options.map(opt => (
+                    <label key={opt} className="inline-flex items-center gap-1">
+                      <input
+                        type="radio"
+                        name="condition-select"
+                        checked={condition.requiredAnswers[0] === opt}
+                        onChange={() => setCondition({ ...condition, requiredAnswers: [opt] })}
+                      />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              );
+            }
+            // fallback free-form input
+            return (
+              <input
+                type="text"
+                placeholder="Required answers (comma-separated)"
+                value={rawAnswers}
+                onChange={e => setRawAnswers(e.target.value)}
+                onBlur={() => {
+                  const vals = rawAnswers
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(s => s);
+                  setCondition({ ...condition, requiredAnswers: vals });
+                  setRawAnswers(vals.join(','));
+                }}
+                className="w-full sm:w-1/2 border px-3 py-2 rounded-lg"
+              />
+            );
+          })()}
         </div>
 
         <button
@@ -159,28 +245,16 @@ const SurveyBuilderPage: React.FC = () => {
             <p className="text-gray-500">No questions yet.</p>
           ) : (
             questions.map((q, index) => (
-              <PreviewQuestion
-                key={q.id}
-                index={index}
-                question={q}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
+              <PreviewQuestion key={q.id} index={index} question={q} onEdit={handleEdit} onDelete={handleDelete} />
             ))
           )}
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-6 pt-6">
-          <button
-            onClick={handleNormalSurvey}
-            className="w-full sm:w-60 bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 font-semibold text-lg"
-          >
+          <button onClick={handleNormalSurvey} className="w-full sm:w-60 bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 font-semibold text-lg">
             🔙 Normal Survey
           </button>
-          <button
-            onClick={handleCreateSurvey}
-            className="w-full sm:w-48 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold text-lg"
-          >
+          <button onClick={handleCreateSurvey} className="w-full sm:w-48 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-semibold text-lg">
             🧪 Fill Survey
           </button>
           <button
@@ -188,17 +262,16 @@ const SurveyBuilderPage: React.FC = () => {
               try {
                 const res = await fetch("http://localhost:8000/logout", {
                   method: "POST",
-                  credentials: "include", // in case cookies/session is used
+                  credentials: "include",
                 });
-
                 if (res.ok) {
-                  localStorage.removeItem("auth_token"); // optional: remove stored token
-                  window.location.href = "/login"; // or use navigate("/login")
+                  localStorage.removeItem("auth_token");
+                  window.location.href = "/login";
                 } else {
                   const data = await res.json();
                   alert(data.detail || "Logout failed.");
                 }
-              } catch (err) {
+              } catch {
                 alert("Error while logging out.");
               }
             }}
