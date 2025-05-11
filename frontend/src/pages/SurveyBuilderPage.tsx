@@ -26,6 +26,7 @@ const SurveyBuilderPage: React.FC = () => {
   const [type, setType] = useState("text");
   const [optionsList, setOptionsList] = useState<string[]>([""]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [questionError, setQuestionError] = useState("");
 
   // condition holds parsed answers; rawAnswers holds the free-form input string
   const [condition, setCondition] = useState<{
@@ -51,32 +52,47 @@ const SurveyBuilderPage: React.FC = () => {
   }, [location.state]);
 
   const addQuestion = () => {
-    if (!label.trim()) return;
+  if (!label.trim()) {
+    setQuestionError("Question label is required.");
+    return;
+  }
 
-    const newQuestion: Question = {
-      id: editingId || uuidv4(),
-      label,
-      type,
-      options: ["multiple_choice", "checkbox", "dropdown"].includes(type)
-        ? optionsList.filter(opt => opt.trim() !== "")
-        : undefined,
-      condition,
-    };
+  if (["multiple_choice", "checkbox", "dropdown"].includes(type)) {
+    const cleaned = optionsList.map(opt => opt.trim()).filter(opt => opt !== "");
+    const unique = Array.from(new Set(cleaned));
+    if (unique.length < 2) {
+      setQuestionError("Please provide at least two unique options.");
+      return;
+    }
+  }
 
-    setQuestions(prev =>
-      editingId
-        ? prev.map(q => (q.id === editingId ? newQuestion : q))
-        : [...prev, newQuestion]
-    );
-
-    // reset form
-    setLabel("");
-    setType("text");
-    setOptionsList([""]);
-    setCondition(null);
-    setEditingId(null);
-    setRawAnswers("");
+  const newQuestion: Question = {
+    id: editingId || uuidv4(),
+    label,
+    type,
+    options: ["multiple_choice", "checkbox", "dropdown"].includes(type)
+      ? optionsList.filter(opt => opt.trim() !== "")
+      : undefined,
+    condition,
   };
+
+  setQuestions(prev =>
+    editingId
+      ? prev.map(q => (q.id === editingId ? newQuestion : q))
+      : [...prev, newQuestion]
+  );
+
+  // Clear form and error
+  setLabel("");
+  setType("text");
+  setOptionsList([""]);
+  setCondition(null);
+  setEditingId(null);
+  setRawAnswers("");
+  setQuestionError("");
+};
+
+
 
   const handleEdit = (question: Question) => {
     setLabel(question.label);
@@ -118,6 +134,7 @@ const SurveyBuilderPage: React.FC = () => {
           </label>
 
           <select
+            data-testid="condition-select"
             value={condition?.dependentQuestionId || ""}
             onChange={e => {
               const depId = e.target.value;
@@ -131,7 +148,9 @@ const SurveyBuilderPage: React.FC = () => {
           >
             <option value="">Select dependent question</option>
             {availableDeps.map(q => (
-              <option key={q.id} value={q.id}>
+              <option key={q.id} 
+              value={q.id}
+              data-testid={`condition-option-${q.label.toLowerCase().replace(/\s+/g, '-')}`}>
                 {q.label}
               </option>
             ))}
@@ -230,13 +249,18 @@ const SurveyBuilderPage: React.FC = () => {
         </div>
 
         <button
+          id="add-question-button"
           type="button"
           onClick={addQuestion}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold transition sm:w-auto sm:px-6"
         >
           {editingId ? "✏️ Update Question" : "➕ Add Question"}
         </button>
-
+          {questionError && (
+            <p className="text-sm text-red-500 mt-1" id="question-error">
+          {questionError}
+          </p>
+        )}
         <div className="space-y-6">
           <h2 className="text-xl sm:text-2xl font-semibold flex items-center gap-2 text-indigo-800">
             📝 Preview Survey

@@ -20,6 +20,8 @@ const PreviewQuestionComponent: React.FC<Props> = ({ index, question, onEdit, on
         <div className="flex gap-3">
           <button
             onClick={() => onEdit(question)}
+            data-testid={`edit-button-${question.id}`}
+            title="Edit Question"
             className="text-blue-600 hover:underline text-sm"
           >
             ✏️ Edit

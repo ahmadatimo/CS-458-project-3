@@ -26,32 +26,35 @@ const OptionInputGroupComponent: React.FC<Props> = ({ optionsList, setOptionsLis
     <div className="col-span-2 space-y-2">
       <p className="text-sm font-medium text-gray-700">Options</p>
       {optionsList.map((opt, index) => (
-        <div key={index} className="flex gap-2">
-          <input
-            type="text"
-            value={opt}
-            onChange={(e) => handleOptionChange(index, e.target.value)}
-            className="border border-indigo-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            placeholder={`Option ${index + 1}`}
-          />
-          {optionsList.length > 1 && (
-            <button
-              type="button"
-              onClick={() => removeOptionField(index)}
-              className="px-3 text-red-500 hover:text-red-700"
-            >
-              ✖
-            </button>
-          )}
-        </div>
-      ))}
+  <div key={index} className="flex gap-2">
+    <input
+      data-testid={`option-input-${index}`}
+      type="text"
+      value={opt}
+      onChange={(e) => handleOptionChange(index, e.target.value)}
+      className="border border-indigo-200 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-indigo-300"
+      placeholder={`Option ${index + 1}`}
+    />
+    {optionsList.length > 1 && (
       <button
         type="button"
-        onClick={addOptionField}
-        className="text-indigo-600 text-sm hover:underline"
+        onClick={() => removeOptionField(index)}
+        className="px-3 text-red-500 hover:text-red-700"
       >
-        ➕ Add another option
+        ✖
       </button>
+    )}
+  </div>
+))}
+
+<button
+  data-testid="add-option-button"
+  type="button"
+  onClick={addOptionField}
+  className="text-indigo-600 text-sm hover:underline"
+>
+  ➕ Add another option
+</button>
     </div>
   );
 };
