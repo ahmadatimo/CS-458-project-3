@@ -202,7 +202,7 @@ const CreatedSurveyPage: React.FC = () => {
           <div className="flex flex-wrap justify-center sm:justify-between gap-4 pt-6">
             <button type="button" onClick={handleLogout} className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-lg font-semibold">🚪 Logout</button>
             <button type="button" onClick={handleEditSurvey} className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded-lg font-semibold">✏️ Edit Survey</button>
-            <button type="submit" disabled={!email.includes("@") || !email.includes(".") || !email.includes("com")} className={`w-full sm:w-auto py-2 px-6 rounded-lg font-semibold transition ${(!email.includes("@") || !email.includes(".")) ? "bg-gray-400 text-white cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700 text-white"}`}>✅ Submit</button>
+            <button type="submit" disabled={!email.includes("@") || !email.includes(".com")} className={`w-full sm:w-auto py-2 px-6 rounded-lg font-semibold transition ${(!email.includes("@") || !email.includes(".")) ? "bg-gray-400 text-white cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700 text-white"}`}>✅ Submit</button>
             <button type="button" onClick={handleNormalSurvey} className="w-full sm:w-auto bg-gray-400 hover:bg-gray-500 text-white py-2 px-6 rounded-lg font-semibold">🔙 Normal Survey</button>
           </div>
         </form>
