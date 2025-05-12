@@ -167,6 +167,7 @@ const CreatedSurveyPage: React.FC = () => {
 
                 {q.type === "dropdown" && q.options && (
                   <select
+                    data-testid={`dropdown-${q.id}`}
                     onChange={e => handleChange(q.id, e.target.value)}
                     className="w-full border px-3 py-2 rounded-lg sm:px-4"
                   >

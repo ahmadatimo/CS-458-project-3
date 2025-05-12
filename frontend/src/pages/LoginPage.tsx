@@ -68,7 +68,20 @@ export default function LoginPage() {
 
   // Handle email/password login
   const handleLogin = async (email: string, password: string) => {
-    setLoading(true);
+  setLoading(true);
+
+  // Frontend email format validation
+  if (!email.includes("@")) {
+    toast.error("❌ Email must include '@'", { position: "top-center" });
+    setLoading(false);
+    return;
+  }
+
+  if (!email.includes(".com")) {
+    toast.error("❌ Email must include a domain like '.com'", { position: "top-center" });
+    setLoading(false);
+    return;
+  }
 
     try {
       const response = await fetch("http://localhost:8000/login", {

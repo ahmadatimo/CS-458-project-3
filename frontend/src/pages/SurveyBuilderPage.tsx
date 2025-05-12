@@ -56,6 +56,10 @@ const SurveyBuilderPage: React.FC = () => {
     setQuestionError("Question label is required.");
     return;
   }
+  if (questions.length >= 10 && !editingId) {
+  setQuestionError("❌ Survey exceeds the maximum limit of 10 questions.");
+  return;
+}
 
   if (["multiple_choice", "checkbox", "dropdown"].includes(type)) {
     const cleaned = optionsList.map(opt => opt.trim()).filter(opt => opt !== "");
@@ -64,6 +68,14 @@ const SurveyBuilderPage: React.FC = () => {
       setQuestionError("Please provide at least two unique options.");
       return;
     }
+  }
+
+  if (
+    condition?.dependentQuestionId &&
+    (!condition.requiredAnswers || condition.requiredAnswers.length === 0)
+  ) {
+    setQuestionError("Please specify the required answer to trigger this condition.");
+    return;
   }
 
   const newQuestion: Question = {
@@ -94,6 +106,7 @@ const SurveyBuilderPage: React.FC = () => {
 
 
 
+
   const handleEdit = (question: Question) => {
     setLabel(question.label);
     setType(question.type);
@@ -103,8 +116,17 @@ const SurveyBuilderPage: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    setQuestions(prev => prev.filter(q => q.id !== id));
-  };
+  const isDependency = questions.some(q => q.condition?.dependentQuestionId === id);
+  if (isDependency) {
+    setQuestionError("❌ You cannot delete this question because another question depends on it.");
+    return;
+  }
+
+  setQuestions(prev => prev.filter(q => q.id !== id));
+  setQuestionError(""); // clear any previous errors
+};
+
+
 
   const handleNormalSurvey = () => navigate("/Survey");
   const handleCreateSurvey = () => navigate("/Created-Survey", { state: { questions } });

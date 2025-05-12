@@ -3,7 +3,7 @@ import React from 'react';
 const SpotifyLoginComponent: React.FC = () => {
   // Spotify OAuth configuration
   const clientId = '57d5a4acd20548fb89c5ceccec77332c'; // Replace with your Spotify Client ID
-  const redirectUri = encodeURIComponent('http://localhost:3000/Successful'); // Replace with your redirect URI
+  const redirectUri = encodeURIComponent('http://localhost:3000/Survey'); // Replace with your redirect URI
   const scopes = encodeURIComponent('user-read-email'); // Add required scopes
   const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scopes}`;
 

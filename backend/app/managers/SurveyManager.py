@@ -68,8 +68,9 @@ class SurveyManager:
             subject=subject,
             recipients=[self.survey.email],
             body=body,
-            subtype="plain"
-        )
+            subtype="plain",
+            charset="utf-8"  # Add this line for multilingual safety
+)
 
         try:
             fm = FastMail(conf)

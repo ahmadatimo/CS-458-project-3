@@ -11,7 +11,8 @@ interface Props {
 
 const PreviewQuestionComponent: React.FC<Props> = ({ index, question, onEdit, onDelete }) => {
   return (
-    <div className="p-4 border border-indigo-100 rounded-lg bg-indigo-50">
+    <div className="p-4 border border-indigo-100 rounded-lg bg-indigo-50"
+    data-testid={`preview-question-${question.id}`}>
       <div className="flex justify-between items-center">
         <p className="font-medium text-gray-800">
           {index + 1}. {question.label}{" "}
