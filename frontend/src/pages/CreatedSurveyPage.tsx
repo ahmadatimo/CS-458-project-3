@@ -42,7 +42,9 @@ const CreatedSurveyPage: React.FC = () => {
       }
     }
 
-    return requiredAnswers.includes(userAnswer as string);
+    return requiredAnswers
+  .map(ans => ans.trim().toLowerCase())
+  .includes((userAnswer as string).trim().toLowerCase());
   };
 
   // Cleanup answers for hidden questions and their dependents

@@ -52,6 +52,7 @@ const SurveyBuilderPage: React.FC = () => {
   }, [location.state]);
 
   const addQuestion = () => {
+  const trimmedLabel = label.trim().toLowerCase();
   if (!label.trim()) {
     setQuestionError("Question label is required.");
     return;
@@ -59,7 +60,22 @@ const SurveyBuilderPage: React.FC = () => {
   if (questions.length >= 10 && !editingId) {
   setQuestionError("❌ Survey exceeds the maximum limit of 10 questions.");
   return;
-}
+  }
+  // Check for duplicate (label + type + options)
+  const isDuplicate = questions.some(q =>
+    q.label.trim().toLowerCase() === trimmedLabel &&
+    q.type === type &&
+    JSON.stringify(q.options || []) === JSON.stringify(
+      ["multiple_choice", "checkbox", "dropdown"].includes(type)
+        ? optionsList.map(opt => opt.trim()).filter(opt => opt !== "")
+        : []
+    )
+  );
+
+  if (isDuplicate) {
+    setQuestionError("❌ This question already exists.");
+    return;
+  }
 
   if (["multiple_choice", "checkbox", "dropdown"].includes(type)) {
     const cleaned = optionsList.map(opt => opt.trim()).filter(opt => opt !== "");
