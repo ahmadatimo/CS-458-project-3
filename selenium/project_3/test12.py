@@ -27,13 +27,10 @@ class TestCase12(unittest.TestCase):
             driver.find_element(By.ID, "login-button").click()
             time.sleep(1)
 
-        # 6th attempt with correct password (should be blocked)
-        time.sleep(1)
-
-        #Wait 60 seconds to unlock
+        # Wait 60 seconds to unlock
         time.sleep(60)
 
-        # Retry with correct password (should succeed)
+        # ----------- Retry with correct credentials -----------
         email = driver.find_element(By.ID, "email")
         password = driver.find_element(By.ID, "password")
         email.clear()
@@ -48,7 +45,6 @@ class TestCase12(unittest.TestCase):
         time.sleep(2)
 
         label_input = driver.find_element(By.CSS_SELECTOR, "[data-testid='question-label']")
-        time.sleep(1)
         label_input.send_keys("Your favorite programming language?")
         time.sleep(1)
         driver.find_element(By.ID, "add-question-button").click()
@@ -57,19 +53,25 @@ class TestCase12(unittest.TestCase):
         driver.find_element(By.XPATH, "//button[contains(text(), 'Fill Survey')]").click()
         time.sleep(2)
 
-        # ----------- PART 3: Email '.com' Validation -----------
+        # ----------- PART 3: Fill the Question BEFORE fixing the email -----------
+        text_input = driver.find_element(By.CSS_SELECTOR, "input[type='text']")
+        text_input.send_keys("Python")
+        time.sleep(2)
+
+        # ----------- PART 4: Email '.com' Validation -----------
         email_input = driver.find_element(By.CSS_SELECTOR, "input[type='email']")
         submit_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Submit')]")
-        time.sleep(2)
+        time.sleep(1)
+
         email_input.clear()
         email_input.send_keys("user@domain")  # Missing .com
-        time.sleep(3)
+        time.sleep(2)
         self.assertFalse(submit_button.is_enabled(), "❌ Submit button should be disabled for invalid email")
 
         email_input.clear()
         email_input.send_keys("user@domain.com")
-        time.sleep(3)
-        self.assertTrue(submit_button.is_enabled(), "✅ Submit button should be enabled for valid email")
+        time.sleep(2)
+        self.assertTrue(submit_button.is_enabled(), "✅ Submit button should be enabled after valid email + answer")
 
     @classmethod
     def tearDownClass(cls):
