@@ -63,14 +63,16 @@ const SurveyBuilderPage: React.FC = () => {
   }
   // Check for duplicate (label + type + options)
   const isDuplicate = questions.some(q =>
-    q.label.trim().toLowerCase() === trimmedLabel &&
-    q.type === type &&
-    JSON.stringify(q.options || []) === JSON.stringify(
-      ["multiple_choice", "checkbox", "dropdown"].includes(type)
-        ? optionsList.map(opt => opt.trim()).filter(opt => opt !== "")
-        : []
-    )
-  );
+  q.id !== editingId && // 🛠️ Skip the current question being edited
+  q.label.trim().toLowerCase() === trimmedLabel &&
+  q.type === type &&
+  JSON.stringify(q.options || []) === JSON.stringify(
+    ["multiple_choice", "checkbox", "dropdown"].includes(type)
+      ? optionsList.map(opt => opt.trim()).filter(opt => opt !== "")
+      : []
+  )
+);
+
 
   if (isDuplicate) {
     setQuestionError("❌ This question already exists.");
