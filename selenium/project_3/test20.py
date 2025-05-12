@@ -18,15 +18,27 @@ class TestCaseEmailAndAnswers(unittest.TestCase):
     def test_submit_requires_valid_email_and_answers(self):
         driver = self.driver
 
-        # ----------- Login -----------
-        print("\n🔐 Attempting login...")
-        driver.find_element(By.ID, "email").send_keys("test@example.com")
-        driver.find_element(By.ID, "password").send_keys("abc123")
+        # ----------- Attempt with special character password (should fail) -----------
+        # ----------- Attempt with special character password (should fail) -----------
+        email_field = driver.find_element(By.ID, "email")
+        password_field = driver.find_element(By.ID, "password")
+        email_field.send_keys("test@example.com")
+        # ----------- Enter special character password (should fail) -----------
+        password_field = driver.find_element(By.ID, "password")
+        driver.execute_script("arguments[0].value = '';", password_field)
+        password_field.send_keys("@!#$%^&*()")
         driver.find_element(By.ID, "login-button").click()
-        time.sleep(4)
+        time.sleep(2)
+
+        # ----------- Now enter correct password (after JS clear) -----------
+        print("\n🔐 Retrying with correct password...")
+        password_field = driver.find_element(By.ID, "password")
+        driver.execute_script("arguments[0].value = '';", password_field)  # Clear using JS
+        password_field.send_keys("abc123")
+        driver.find_element(By.ID, "login-button").click()
+        time.sleep(3)
 
         # ----------- Go to Survey Builder -----------
-        print("🛠️ Navigating to Survey Builder...")
         driver.find_element(By.XPATH, "//button[contains(text(), 'Create Survey')]").click()
         time.sleep(3)
 
