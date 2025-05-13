@@ -64,7 +64,7 @@ It is a **responsive full-stack web application** developed using the **Test-Dri
 
 2. Install required dependencies:
    ```bash
-   npm install
+   pip install -r requirements.txt
    ```
 
 3. Start the development server:
