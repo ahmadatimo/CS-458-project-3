@@ -106,7 +106,7 @@ pip install selenium
    ```
   # Macos/Linux
   ```bash
-   python3.10 run_tests.py
+   python3 run_tests.py
    ```
 
 ---
