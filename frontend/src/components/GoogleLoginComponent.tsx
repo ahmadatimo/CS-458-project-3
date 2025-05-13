@@ -11,7 +11,7 @@ export default function GoogleLoginComponent() {
       const decoded = jwtDecode<{ name: string }>(credentialResponse.credential);
       console.log("Google User:", decoded);
       toast.success(`✅ Welcome, ${decoded.name}!`, { position: "top-center" });
-      navigate("/successful")
+      navigate("/Survey")
     } else {
       toast.error("❌ Google Login Failed: No credential received.", { position: "top-center" });
     }
