@@ -76,20 +76,37 @@ It is a **responsive full-stack web application** developed using the **Test-Dri
 
 ---
 
-## 🧪 Running Tests
-
-### Backend (Pytest)
+### Running the test cases
 
 ```bash
-cd backend
-pytest
+cd selenium/project_3
+pip install selenium
 ```
+## Running Singular Test File
 
-### Frontend (Jest + React Testing Library)
+  # Windows
+  ```bash
+   python test1.py  
+   python test2.py
+   ...
+   python test20.py
+   ```
+  # Macos/Linux
+  ```bash
+   python3.10 test1.py  
+   python3.10 test2.py
+   ...
+   python3.10 test20.py
+   ```
+## Running All Test File
 
-```bash
-cd frontend
-npm test
-```
+  # Windows
+  ```bash
+   python run_tests.py  
+   ```
+  # Macos/Linux
+  ```bash
+   python3.10 run_tests.py
+   ```
 
 ---

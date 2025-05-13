@@ -1,8 +1,8 @@
 import os
 import subprocess
 
-# List of test files to run
-test_files = ["test1.py", "test2.py", "test3.py", "test4.py", "test5.py"]
+# Automatically generate test file names from test1.py to test20.py
+test_files = [f"test{i}.py" for i in range(1, 21)]
 
 for test_file in test_files:
     print(f"Running {test_file}...")
