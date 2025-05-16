@@ -9,7 +9,6 @@ It is a **responsive full-stack web application** developed using the **Test-Dri
 
 - **Backend**: FastAPI (Python)
 - **Frontend**: TypeScript + React
-- **Testing**: Pytest (backend), Jest + React Testing Library (frontend)
 - **Screens**:
   - Login Page
   - Survey Page
